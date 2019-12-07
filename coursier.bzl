@@ -66,7 +66,9 @@ def _relativize_and_symlink_file(repository_ctx, absolute_path):
         # Make a symlink from the absolute path of the artifact to the relative
         # path within the output_base/external.
         artifact_relative_path = "v1/" + absolute_path_parts[1]
-        repository_ctx.symlink(absolute_path, repository_ctx.path(artifact_relative_path))
+        to = repository_ctx.path(artifact_relative_path)
+        if not to.exists:
+          repository_ctx.symlink(absolute_path, to)
     return artifact_relative_path
 
 # Generate the base `coursier` command depending on the OS, JAVA_HOME or the
