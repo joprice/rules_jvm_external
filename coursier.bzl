@@ -279,6 +279,12 @@ def _pinned_coursier_fetch_impl(repository_ctx):
         "def pinned_maven_install():",
     ]
     netrc_entries = {}
+
+    for artifact in dep_tree["dependencies"]:
+        if artifact.get("url") != None:
+            if artifact.get("mirror_urls") != None:
+                netrc_entries = add_netrc_entries_from_mirror_urls(netrc_entries, artifact["mirror_urls"])
+
     for artifact in dep_tree["dependencies"]:
         if artifact.get("url") != None:
             http_file_repository_name = escape(artifact["coord"])
@@ -289,13 +295,15 @@ def _pinned_coursier_fetch_impl(repository_ctx):
                 # repository_ctx should point to external/$repository_ctx.name
                 # The http_file should point to external/$http_file_repository_name
                 # File-path is relative defined from http_file traveling to repository_ctx.
-                "        netrc = \"../%s/netrc\"," % (repository_ctx.name),
             ])
+            if len(netrc_entries) > 0:
+              http_files.append("        netrc = \"../%s/netrc\"," % (repository_ctx.name))
             if artifact.get("mirror_urls") != None:
                 http_files.append("        urls = %s," % repr(
                     [remove_auth_from_url(url) for url in artifact["mirror_urls"]],
                 ))
                 netrc_entries = add_netrc_entries_from_mirror_urls(netrc_entries, artifact["mirror_urls"])
+                    [remove_auth_from_url(url) for url in artifact["mirror_urls"]]))
             else:
                 # For backwards compatibility. mirror_urls is a field added in a
                 # later version than the url field, so not all maven_install.json
@@ -310,6 +318,9 @@ def _pinned_coursier_fetch_impl(repository_ctx):
         ),
         executable = False,
     )
+
+    if len(netrc_entries) > 0:
+      repository_ctx.file("netrc", "\n".join(get_netrc_lines_from_entries(netrc_entries)), executable = False)
 
     repository_ctx.report_progress("Generating BUILD targets..")
     (generated_imports, jar_versionless_target_labels) = parser.generate_imports(
