@@ -421,8 +421,9 @@ def infer_artifact_path_from_primary_and_repos(primary_url, repository_urls):
     primary_artifact_path = None
     for url in userless_repository_urls:
         if userless_primary_url.find(url) != -1:
-            primary_artifact_path = userless_primary_url[len(url) + 1:]
-            break
+            if userless_primary_url[len(url)] == "/":
+                primary_artifact_path = userless_primary_url[len(url) + 1:]
+                break
     return primary_artifact_path
 
 def _coursier_fetch_impl(repository_ctx):
