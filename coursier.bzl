@@ -205,7 +205,8 @@ def get_netrc_lines_from_entries(netrc_entries):
 def get_home_netrc_contents(repository_ctx):
     # Copied with a ctx -> repository_ctx rename from tools/build_defs/repo/http.bzl's _get_auth.
     # Need to keep updated with improvements in source since we cannot load private methods.
-    if repository_ctx.os.exists(".netrc"):
+    path = repository_ctx.path(".netrc")
+    if path.exists:
       netrcfile = ".netrc"
     elif "HOME" in repository_ctx.os.environ:
         if not repository_ctx.os.name.startswith("windows"):
