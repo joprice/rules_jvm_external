@@ -205,11 +205,7 @@ def get_netrc_lines_from_entries(netrc_entries):
 def get_home_netrc_contents(repository_ctx):
     # Copied with a ctx -> repository_ctx rename from tools/build_defs/repo/http.bzl's _get_auth.
     # Need to keep updated with improvements in source since we cannot load private methods.
-    #if "NETRC_FILE" in repository_ctx.os.environ:
-
-    if repository_ctx.attr.netrcfile != None:
-      netrcfile = repository_ctx.attr.netrcfile
-    elif repository_ctx.os.exists(".netrc"):
+    if repository_ctx.os.exists(".netrc"):
       netrcfile = ".netrc"
     elif "HOME" in repository_ctx.os.environ:
         if not repository_ctx.os.name.startswith("windows"):
@@ -755,7 +751,6 @@ pinned_coursier_fetch = repository_rule(
             """,
             default = False,
         ),
-        "netrcfile": attr.string(),
     },
     implementation = _pinned_coursier_fetch_impl,
 )
