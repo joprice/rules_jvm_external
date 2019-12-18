@@ -30,7 +30,9 @@ def maven_install(
         maven_install_json = None,
         override_targets = {},
         strict_visibility = False,
-        resolve_timeout = 600):
+        resolve_timeout = 600,
+        netrcfile = None,
+        ):
     """Resolves and fetches artifacts transitively from Maven repositories.
 
     This macro runs a repository rule that invokes the Coursier CLI to resolve
@@ -116,6 +118,7 @@ def maven_install(
             generate_compat_repositories = generate_compat_repositories,
             override_targets = override_targets,
             strict_visibility = strict_visibility,
+            netrcfile = netrcfile
         )
 
 def artifact(a, repository_name = DEFAULT_REPOSITORY_NAME):

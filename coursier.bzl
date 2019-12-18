@@ -205,17 +205,32 @@ def get_netrc_lines_from_entries(netrc_entries):
 def get_home_netrc_contents(repository_ctx):
     # Copied with a ctx -> repository_ctx rename from tools/build_defs/repo/http.bzl's _get_auth.
     # Need to keep updated with improvements in source since we cannot load private methods.
-    path = repository_ctx.path(".netrc")
-    if path.exists:
-      netrcfile = ".netrc"
-    elif "HOME" in repository_ctx.os.environ:
+    #if repository_ctx.attr.netrcfile:
+    #  path = repository_ctx.path(repository_ctx.attr.netrcfile)
+    #  repository_ctx.symlink(
+    #      path,
+    #      repository_ctx.path("netrc"),
+    #  )
+    #  content = json_parse(
+    #      repository_ctx.read(
+    #          repository_ctx.path("netrc"),
+    #      ),
+    #      fail_on_invalid = False,
+    #  )
+    #  print(content)
+    #  netrcfile = ".netrc"
+    #print(repository_ctx.os.environ)
+    if "HOME" in repository_ctx.os.environ:
         if not repository_ctx.os.name.startswith("windows"):
             netrcfile = "%s/.netrc" % (repository_ctx.os.environ["HOME"],)
+    else:
+      print("Did not find home env")
     if netrcfile != None:
+      print("try {} {} {}".format(netrcfile, repository_ctx.which("test"), repository_ctx.execute(["test", "-f", netrcfile]).return_code))
       if repository_ctx.which("test") and repository_ctx.execute(["test", "-f", netrcfile]).return_code == 0:
         return repository_ctx.read(netrcfile)
     else:
-      fail("No netrc file found")
+      print("No netrc file found")
     return ""
 
 def _pinned_coursier_fetch_impl(repository_ctx):
@@ -752,12 +767,18 @@ pinned_coursier_fetch = repository_rule(
             """,
             default = False,
         ),
+        "netrcfile": attr.label(
+            allow_single_file = True,
+        ),
     },
     implementation = _pinned_coursier_fetch_impl,
 )
 
 coursier_fetch = repository_rule(
     attrs = {
+        #"netrcfile": attr.label(
+        #    allow_single_file = True,
+        #),
         "_sha256_hasher": attr.label(default = "//private/tools/prebuilt:hasher_deploy.jar"),
         "_jvm_import": attr.label(default = "//:private/jvm_import.bzl"),
         "_pin": attr.label(default = "//:private/pin.sh"),
