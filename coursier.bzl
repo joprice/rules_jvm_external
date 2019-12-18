@@ -211,11 +211,11 @@ def get_home_netrc_contents(repository_ctx):
     elif "HOME" in repository_ctx.os.environ:
         if not repository_ctx.os.name.startswith("windows"):
             netrcfile = "%s/.netrc" % (repository_ctx.os.environ["HOME"],)
-    else:
-      fail("No netrc file found")
     if netrcfile != None:
       if repository_ctx.which("test") and repository_ctx.execute(["test", "-f", netrcfile]).return_code == 0:
         return repository_ctx.read(netrcfile)
+    else:
+      fail("No netrc file found")
     return ""
 
 def _pinned_coursier_fetch_impl(repository_ctx):
